@@ -5,7 +5,7 @@ pipeline {
         stage('show directory contents') {
             steps {
                 script {
-                    echo "Develop"
+                    echo "Develop new proposal"
                     sh("ls -al")
                 }
             }
