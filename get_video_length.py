@@ -45,16 +45,6 @@ for duration in get_durations_lazy(VIDEO_DIR):
     current_file += 1
 
 
-
-
-
-
-
-
-
-
-
-
     #
     # metadata = ffmpeg.probe(filename)["streams"]
     #         duration = metadata[0]["duration"]
