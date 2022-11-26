@@ -8,18 +8,22 @@ length = 0
 current_file = 0
 
 
-def get_video_files(directory):
-    video_files = []
+def get_num_files(directory):
+    n = 0
     for root, dirs, files in os.walk(directory):
         for name in files:
             filename = os.path.join(root, name)
             if ".mp4" in filename:
-                video_files.append(filename)
-    return video_files
+                n += 1
+    return n
 
 
-def get_duration(filename):
-    return float(ffmpeg.probe(filename)["streams"][0]["duration"])
+def get_durations_lazy(directory):
+    for root, dirs, files in os.walk(directory):
+        for name in files:
+            filename = os.path.join(root, name)
+            if ".mp4" in filename:
+                yield float(ffmpeg.probe(filename)["streams"][0]["duration"])
 
 
 def perc(curr, num):
@@ -33,10 +37,11 @@ def format_duration(x):
         return str(datetime.datetime.strptime(str(datetime.timedelta(seconds=x)), "%H:%M:%S.%f").strftime("%H:%M:%S"))
 
 
-files = get_video_files(VIDEO_DIR)
-for file in files:
-    print("\rDuration:", format_duration(length), perc(current_file, len(files)), end="")
-    length += get_duration(file)
+num_files = get_num_files(VIDEO_DIR)
+print("num_files:", num_files)
+for duration in get_durations_lazy(VIDEO_DIR):
+    print("\rDuration:", format_duration(length), perc(current_file, num_files), end="")
+    length += duration
     current_file += 1
 
 
