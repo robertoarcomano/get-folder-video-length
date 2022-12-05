@@ -2,28 +2,21 @@ import ffmpeg
 import os
 import datetime
 import math
-
-VIDEO_DIR = "Jenkins_Course"
-length = 0
-current_file = 0
+import sys
 
 
-def get_num_files(directory):
-    n = 0
+def get_video_files(directory):
+    video_files = []
     for root, dirs, files in os.walk(directory):
         for name in files:
             filename = os.path.join(root, name)
             if ".mp4" in filename:
-                n += 1
-    return n
+                video_files.append(filename)
+    return video_files
 
 
-def get_durations_lazy(directory):
-    for root, dirs, files in os.walk(directory):
-        for name in files:
-            filename = os.path.join(root, name)
-            if ".mp4" in filename:
-                yield float(ffmpeg.probe(filename)["streams"][0]["duration"])
+def calc_duration(filename):
+    return float(ffmpeg.probe(filename)["streams"][0]["duration"])
 
 
 def perc(curr, num):
@@ -31,23 +24,33 @@ def perc(curr, num):
 
 
 def format_duration(x):
-    if x == 0:
-        return "0:0:0"
-    else:
-        return str(datetime.datetime.strptime(str(datetime.timedelta(seconds=x)), "%H:%M:%S.%f").strftime("%H:%M:%S"))
+    return str(
+        datetime.datetime.strptime(
+            str(
+                datetime.timedelta(seconds=math.floor(x))
+            )
+            , "%H:%M:%S"
+        )
+        .strftime("%H:%M:%S")
+    )
 
 
-num_files = get_num_files(VIDEO_DIR)
-print("num_files:", num_files)
-for duration in get_durations_lazy(VIDEO_DIR):
-    print("\rDuration:", format_duration(length), perc(current_file, num_files), end="")
-    length += duration
-    current_file += 1
+if __name__ == "__main__":
+    length = 0
+    current_file = 0
+    VIDEO_DIR = ""
+    try:
+        VIDEO_DIR = sys.argv[1]
+    except IndexError:
+        print("Syntax: ", sys.argv[0], "<Video Directory>")
+        exit(-1)
+    videos = get_video_files(VIDEO_DIR)
+    num_videos = len(videos)
+    print("Video Files:", num_videos)
+    for duration in map(calc_duration, videos):
+        length += duration
+        current_file += 1
+        print("\rDuration:", format_duration(length), perc(current_file, num_videos), end="")
+    print()
 
 
-    #
-    # metadata = ffmpeg.probe(filename)["streams"]
-    #         duration = metadata[0]["duration"]
-    #         length += float(duration)
-    #         current_file += 1
-    #         print("\r", format(length), perc(current_file, num_files), end="")
