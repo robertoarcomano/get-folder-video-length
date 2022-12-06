@@ -1,13 +1,19 @@
-// Jenkinsfile for building and testing Masterit
+// Jenkinsfile
 pipeline {
-    agent any
+    agent {
+        node {
+            label 'oracle1'
+        }
+        node {
+            label 'oracle3'
+        }
+    }
     // Let's test
     stages {
         stage('show directory contents') {
             steps {
                 script {
-                    echo "Develop new proposal"
-                    sh("ls -al")
+                    sh("./start.sh")
                 }
             }
         }
