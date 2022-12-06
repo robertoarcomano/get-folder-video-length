@@ -1,12 +1,7 @@
 // Jenkinsfile
 pipeline {
     agent {
-        node {
-            label 'oracle1'
-        }
-        node {
-            label 'oracle3'
-        }
+        label 'oracle1 && oracle3'
     }
     // Let's test
     stages {
