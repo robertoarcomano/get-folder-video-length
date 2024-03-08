@@ -2,8 +2,8 @@ import ffmpeg
 import os
 import datetime
 import math
+import sys
 
-VIDEO_DIR = "Jenkins_Course"
 length = 0
 current_file = 0
 
@@ -30,24 +30,18 @@ def perc(curr, num):
     return str(math.ceil(curr * 100 / num)) + "%"
 
 
-def format_duration(x):
-    if x == 0:
-        return "0:0:0"
-    else:
-        return str(datetime.datetime.strptime(str(datetime.timedelta(seconds=x)), "%H:%M:%S.%f").strftime("%H:%M:%S"))
+if len(sys.argv) < 2:
+    print("Syntax:", sys.argv[0], "<Video Directory>")
+    exit(-1)
 
-
+VIDEO_DIR = sys.argv[1]
 num_files = get_num_files(VIDEO_DIR)
+if num_files == 0:
+    print("No video files in", VIDEO_DIR)
+    exit(-2)
 print("num_files:", num_files)
 for duration in get_durations_lazy(VIDEO_DIR):
-    print("\rDuration:", format_duration(length), perc(current_file, num_files), end="")
+    print("\rDuration:", str(datetime.timedelta(seconds=length)).split(".")[0], perc(current_file, num_files), end="")
     length += duration
     current_file += 1
 
-
-    #
-    # metadata = ffmpeg.probe(filename)["streams"]
-    #         duration = metadata[0]["duration"]
-    #         length += float(duration)
-    #         current_file += 1
-    #         print("\r", format(length), perc(current_file, num_files), end="")
